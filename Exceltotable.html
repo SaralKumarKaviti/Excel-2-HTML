@@ -1,0 +1,121 @@
+
+<html lang="en">
+    <head>
+      <meta charset="UTF-8" />
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+      <meta http-equiv="X-UA-Compatible" content="ie=edge" />
+      <!-- used boostrap style sheet libraray -->
+      <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+  
+      <title>Document</title>
+      <!-- used javascript library  to dsiplay excel data on web page  -->
+      <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.15.3/xlsx.full.min.js" ></script>
+    </head>
+
+    <style>
+        table {
+          border-collapse: collapse;
+          width: 100%;
+        }
+        
+        th, td {
+          text-align: left;
+          padding: 8px;
+        }
+        
+        tr:nth-child(even) {
+          background-color: #D6EEEE;
+        }
+     
+        </style>
+  
+    <body>
+        <div class="container">
+            <h2 class="text-center mt-4 mb-4">
+                Convert Excel to HTML Table
+
+            </h2>
+            <div class="card">
+                <div class="card-header">
+                    <b>
+                        Select Excel File(xlsx/csv):
+                    </b>
+                </div>
+                    <div class="card-body">
+                        <input  class="btn btn-primary" type="file" id="excel_file">
+
+
+                        
+                        <br>
+
+
+                    </div>
+
+            </div>
+
+            <div id="excel_data" class="mt-5">
+
+            </div>
+
+        </div>
+    
+    </body>
+    <script>
+// created excel_file variable so that we can store the properties of excel file.
+
+        const  excel_file=document.getElementById('excel_file')
+        //in addEventListener we are passing two arguments change and callback function
+        excel_file.addEventListener('change',(event)=>{
+
+            //reader varibal has FileReader Object
+            var reader = new FileReader();
+            //reader is a  buffer for selected excel file 
+            reader.readAsArrayBuffer(event.target.files[0]);
+            //when start reading excel file it will excecute this function.
+            reader.onload = function(event)
+            {
+
+                /* if any slected file content type is object stream so we need to convert reader to unit8array
+                and we are passing result into  reader  into unit8array constructor*/
+                 var data = new Uint8Array(reader.result);
+                 //After converting data into array into sheet method ,in XLSX.read() we are passing 2 arguments
+                 //so this code will import selected excel file as sheet java script work book object
+                 var work_book = XLSX.read(data,{type:'array'});
+                 //we want get selected excel file or sheet name so we are writing sheet_name variable 
+                 var sheet_name = work_book.SheetNames;
+                 //After getting Excel files sheet name now we want get sheet data in json format and we are passing arguments
+                 //sheet_name 0 index and headders with 1 so this code will convert slected header data as table headersand store in sheet data variable
+
+                 var sheet_data = XLSX.utils.sheet_to_json(work_book.Sheets[sheet_name[0]],{header:1});
+
+                 if(sheet_data.length>0)
+                 {
+                     var table_output = '<table  class="table table-striped table-bordered">';
+
+                        for(var row=0;row < sheet_data.length;row++)
+                        {
+                            
+                            table_output += '<tr >';
+                                //fetch single column row data 
+
+                                for(var cell = 0;cell < sheet_data[row].length;cell++)
+                                {
+
+                                    //it will print all rows and columns of data 
+                                    table_output += '<td>'+sheet_data[row][cell]+'</td>';
+                                }
+                                table_output +='</tr>'
+                        }
+                        table_output += '</table>';
+                        //it will  display excel table into web page .excel_data.innerHTML it will show html format table int webpage 
+                        document.getElementById('excel_data').innerHTML = table_output;
+
+                 }
+
+
+            }
+
+        });
+      </script>
+  </html>
+  
